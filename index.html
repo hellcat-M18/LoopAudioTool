@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zero-Cross Loop Cutter (Web)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; background: #111; color: #eee; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    label { display: block; margin-top: 10px; }
+    input[type="number"] { width: 100px; }
+    select { margin-left: 4px; }
+    button { margin-top: 15px; padding: 6px 12px; cursor: pointer; }
+    #log { white-space: pre-wrap; background: #222; padding: 10px; margin-top: 10px; height: 220px; overflow-y: auto; font-size: 0.85rem; }
+    .row { margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h1>Zero-Cross Loop Cutter (Web)</h1>
+
+  <label>
+    入力ファイル (mp3 / mp4 / wav / ogg など, 複数選択可):
+    <input type="file" id="fileInput" accept="audio/*,video/*" multiple />
+  </label>
+
+  <div class="row">
+    <label>
+      開始 (秒):
+      <input type="number" id="startSec" value="1" step="0.01" />
+    </label>
+    <label>
+      終了 (秒):
+      <input type="number" id="endSec" value="3" step="0.01" />
+    </label>
+  </div>
+
+  <div class="row">
+    <label>
+      ゼロクロス探索範囲 (サンプル数):
+      <!-- 初期値 4000 -->
+      <input type="number" id="searchRadius" value="4000" step="1" />
+    </label>
+  </div>
+
+  <div class="row">
+    <label>
+      出力フォーマット:
+      <select id="outFormat">
+        <option value="ogg" selected>ogg (Vorbis)</option>
+        <option value="wav">wav (PCM)</option>
+        <option value="mp3">mp3</option>
+      </select>
+    </label>
+
+    <label>
+      Ogg 品質 (0〜10, 既定値 3):
+      <input type="number" id="oggQuality" value="3" min="0" max="10" step="1" />
+    </label>
+  </div>
+
+  <button id="runBtn">選択したファイルを一括処理してダウンロード</button>
+
+  <div id="log"></div>
+
+  <!-- Ogg Vorbis エンコーダライブラリ（ローカル配置） -->
+  <script src="./ogg-vorbis-encoder.min.js"></script>
+  <!-- MP3 エンコーダライブラリ（ローカル配置） -->
+  <script src="./lame.min.js"></script>
+
+  <!-- メイン処理 -->
+  <script src="./main.js"></script>
+</body>
+</html>
