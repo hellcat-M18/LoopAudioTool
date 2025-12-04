@@ -5,693 +5,223 @@
   <title>Loop Audio Tool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-elevated: #111827;
-      --bg-elevated-soft: #020617;
-      --border-subtle: #1f2937;
-      --accent: #38bdf8;
-      --accent-soft: rgba(56, 189, 248, 0.12);
-      --accent-secondary: #818cf8;
-      --accent-tertiary: #22d3ee;
-      --text: #e5e7eb;
-      --text-muted: #9ca3af;
-      --danger: #f97373;
-      --success: #34d399;
-      --radius-lg: 12px;
-      --radius-md: 8px;
-      --radius-sm: 6px;
-      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.65);
-      --shadow-subtle: 0 0 0 1px rgba(15, 23, 42, 0.8);
-      --font-mono: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-
     * {
       box-sizing: border-box;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-
-    @keyframes gradient-shift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: 
-        radial-gradient(ellipse at top left, rgba(129, 140, 248, 0.15), transparent 50%),
-        radial-gradient(ellipse at bottom right, rgba(34, 211, 238, 0.12), transparent 50%),
-        radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
-      background-size: 100% 100%, 100% 100%, 100% 100%;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      position: relative;
-      overflow-x: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      padding: 20px;
+      line-height: 1.6;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(129, 140, 248, 0.06) 0%, transparent 50%);
-      animation: gradient-shift 15s ease infinite;
-      pointer-events: none;
-      z-index: 0;
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
     }
 
-    .app-shell {
-      width: 100%;
-      max-width: 960px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card {
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
-                  radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.10), transparent 55%),
-                  var(--bg-elevated);
-      border-radius: 20px;
-      box-shadow: 
-        var(--shadow-soft),
-        0 0 0 1px rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(15,23,42,0.9);
-      padding: 24px 26px 22px;
-      backdrop-filter: blur(20px) saturate(150%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(56, 189, 248, 0.5) 30%, 
-        rgba(129, 140, 248, 0.5) 70%, 
-        transparent 100%);
-      opacity: 0.6;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-    }
-
-    .title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #22d3ee 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 200% 200%;
-      animation: gradient-shift 8s ease infinite;
-    }
-
-    .title span.accent-dot {
-      display: inline-flex;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: radial-gradient(circle, #38bdf8, #0ea5e9);
-      box-shadow: 
-        0 0 20px rgba(56, 189, 248, 0.8),
-        0 0 40px rgba(56, 189, 248, 0.4);
-      animation: pulse-glow 2s ease-in-out infinite;
-      -webkit-text-fill-color: initial;
-    }
-
-    .subtitle {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-      line-height: 1.5;
-    }
-
-    .badge {
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: 
-        linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.15)),
-        rgba(15,23,42,0.95);
-      border-radius: 999px;
-      padding: 6px 12px;
-      border: 1px solid rgba(56,189,248,0.35);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .badge:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
-      border-color: rgba(56,189,248,0.6);
-    }
-
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
-      animation: pulse-glow 2s ease-in-out infinite;
-    }
-
-    .badge-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
-      gap: 18px;
-      margin-top: 4px;
-    }
-
-    @media (max-width: 768px) {
-      body {
-        padding: 12px;
-      }
-      .card {
-        padding: 18px 16px;
-      }
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .title {
-        font-size: 1.3rem;
-      }
-    }
-
-    .panel {
-      background: 
-        linear-gradient(135deg, rgba(56, 189, 248, 0.05), transparent),
-        linear-gradient(to bottom, rgba(15,23,42,0.75), rgba(15,23,42,0.9));
-      border-radius: 14px;
-      border: 1px solid rgba(56, 189, 248, 0.15);
-      box-shadow: 
-        var(--shadow-subtle),
-        0 4px 16px rgba(0, 0, 0, 0.3);
-      padding: 16px 14px 14px;
-      transition: all 0.3s ease;
-    }
-
-    .panel:hover {
-      border-color: rgba(56, 189, 248, 0.25);
-      box-shadow: 
-        var(--shadow-subtle),
-        0 6px 24px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(56, 189, 248, 0.1);
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-    }
-
-    .panel-title {
-      font-size: 0.9rem;
+    h1 {
+      font-size: 24px;
       font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      margin-bottom: 8px;
+      color: #2563eb;
     }
 
-    .panel-title::before {
-      content: '';
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+    .description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
     }
 
-    .panel-hint {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      opacity: 0.85;
+    .section {
+      margin-bottom: 30px;
     }
 
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
     }
 
-    .field-row {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      column-gap: 8px;
-      row-gap: 4px;
-      align-items: center;
-      font-size: 0.86rem;
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    @media (max-width: 640px) {
-      .field-row {
-        grid-template-columns: 1fr;
-      }
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
 
-    .field-label {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .field-description {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .field-control {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 10px;
-      align-items: center;
+    input[type="file"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
     }
 
     input[type="number"],
-    select,
-    input[type="file"] {
-      font: inherit;
-      font-size: 0.88rem;
-      padding: 8px 10px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      background: 
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 60%),
-        #020617;
-      color: var(--text);
-      min-width: 0;
+    select {
+      max-width: 200px;
+    }
+
+    input:focus,
+    select:focus {
       outline: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
-    input[type="number"]:hover,
-    select:hover,
-    input[type="file"]:hover {
-      border-color: rgba(56, 189, 248, 0.4);
-      background: 
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 60%),
-        #020617;
+    .inline-inputs {
+      display: flex;
+      gap: 16px;
+      align-items: center;
     }
 
-    input[type="number"]:focus,
-    select:focus,
-    input[type="file"]:focus {
-      border-color: var(--accent);
-      box-shadow: 
-        0 0 0 3px rgba(56,189,248,0.15),
-        0 4px 12px rgba(0, 0, 0, 0.3);
-      background: 
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 60%),
-        #020617;
-      transform: translateY(-1px);
+    .inline-inputs label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
     }
 
-    input[type="file"] {
-      padding: 8px 10px;
-      font-size: 0.82rem;
-      cursor: pointer;
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
     }
 
-    input[type="file"]::file-selector-button {
-      padding: 6px 12px;
-      margin-right: 10px;
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      border-radius: 6px;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.15));
-      color: var(--accent);
-      font-size: 0.82rem;
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 16px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(129, 140, 248, 0.25));
-      border-color: rgba(56, 189, 248, 0.6);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-    }
-
-    .inline-note {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-    }
-
-    button.primary {
       width: 100%;
-      margin-top: 16px;
-      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-      color: #0b1220;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 0.94rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      box-shadow: 
-        0 8px 24px rgba(56, 189, 248, 0.4),
-        0 0 0 1px rgba(56, 189, 248, 0.3);
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      transition: background 0.2s;
     }
 
-    button.primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s ease;
+    button:hover {
+      background: #1d4ed8;
     }
 
-    button.primary:hover::before {
-      left: 100%;
+    button:active {
+      background: #1e40af;
     }
 
-    button.primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 
-        0 12px 36px rgba(56, 189, 248, 0.6),
-        0 0 0 1px rgba(56, 189, 248, 0.5);
-      filter: brightness(1.1);
-    }
-
-    button.primary:active {
-      transform: translateY(0);
-      box-shadow: 
-        0 4px 16px rgba(56, 189, 248, 0.4),
-        0 0 0 1px rgba(56, 189, 248, 0.4);
-      filter: brightness(0.95);
-    }
-
-    button.primary:disabled {
-      opacity: 0.5;
+    button:disabled {
+      background: #9ca3af;
       cursor: not-allowed;
-      box-shadow: none;
-      transform: none;
-      filter: none;
-    }
-
-    button.primary:disabled:hover {
-      transform: none;
-      box-shadow: none;
-    }
-
-    .btn-icon {
-      font-size: 1.1rem;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
 
     #log {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      border-radius: 12px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 50%),
-        radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.08), transparent 50%),
-        #020617;
-      box-shadow: 
-        var(--shadow-subtle),
-        inset 0 2px 8px rgba(0, 0, 0, 0.3);
-      padding: 12px;
-      height: 220px;
-      overflow-y: auto;
+      background: #1f2937;
       color: #e5e7eb;
+      padding: 16px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      height: 300px;
+      overflow-y: auto;
       white-space: pre-wrap;
-      line-height: 1.6;
-      transition: all 0.3s ease;
+      word-wrap: break-word;
     }
 
-    #log:hover {
-      border-color: rgba(56, 189, 248, 0.3);
-      box-shadow: 
-        var(--shadow-subtle),
-        inset 0 2px 8px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(56, 189, 248, 0.1);
-    }
-
-    #log::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    #log::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
-      border-radius: 4px;
-    }
-
-    #log::-webkit-scrollbar-thumb {
-      background: rgba(56, 189, 248, 0.3);
-      border-radius: 4px;
-      transition: background 0.2s ease;
-    }
-
-    #log::-webkit-scrollbar-thumb:hover {
-      background: rgba(56, 189, 248, 0.5);
-    }
-
-    .log-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.1);
-    }
-
-    .log-header span {
-      opacity: 0.95;
-    }
-
-    .log-header .pill {
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(129, 140, 248, 0.1));
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15);
-    }
-
-    .inline-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 999px;
-      padding: 3px 8px;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(129, 140, 248, 0.08));
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      font-size: 0.72rem;
-      font-weight: 500;
-    }
-
-    .pill-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
-      animation: pulse-glow 2s ease-in-out infinite;
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      .inline-inputs {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      input[type="number"],
+      select {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <div class="card">
-      <header class="card-header">
-        <div>
-          <div class="title">
-            <span class="accent-dot"></span>
-            <span>Loop Audio Tool</span>
-          </div>
-          <div class="subtitle">
-            ゼロクロス位置で自動トリムして、ゲーム用ループ音源をまとめて生成します。
-          </div>
-        </div>
-        <div class="badge">
-          <span class="badge-dot"></span>
-          <span>Zero-cross loop</span>
-        </div>
-      </header>
+  <div class="container">
+    <h1>Loop Audio Tool</h1>
+    <p class="description">ゼロクロス位置で自動トリムして、ゲーム用ループ音源を生成します。</p>
 
-      <div class="grid">
-        <!-- 左：設定パネル -->
-        <section class="panel">
-          <div class="panel-header">
-            <div class="panel-title">Settings</div>
-            <div class="panel-hint">同じ設定が選択中のすべてのファイルに適用されます。</div>
-          </div>
+    <div class="section">
+      <h2 class="section-title">設定</h2>
 
-          <div class="field-group">
-            <!-- ファイル選択 -->
-            <div class="field-row">
-              <div class="field-label">入力ファイル</div>
-              <div class="field-control">
-                <input type="file" id="fileInput" accept="audio/*,video/*" multiple />
-              </div>
-            </div>
-
-            <!-- 開始・終了秒 -->
-            <div class="field-row">
-              <div class="field-label">範囲（秒）</div>
-              <div class="field-control">
-                <div>
-                  <label>
-                    開始:
-                    <input type="number" id="startSec" value="1" step="0.01" />
-                  </label>
-                  &nbsp;&nbsp;
-                  <label>
-                    終了:
-                    <input type="number" id="endSec" value="3" step="0.01" />
-                  </label>
-                  <div class="field-description">
-                    目安の範囲を指定すると、その近くのゼロクロスポイントで自動的に調整されます。
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ゼロクロス探索範囲 -->
-            <div class="field-row">
-              <div class="field-label">探索範囲</div>
-              <div class="field-control">
-                <div>
-                  <label>
-                    サンプル数:
-                    <input type="number" id="searchRadius" value="4000" step="1" />
-                  </label>
-                  <div class="field-description">
-                    指定位置から前後に探す範囲です。4000 ≒ 前後 0.09 秒。大きくするとクリックが減りやすくなります。
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 出力フォーマット -->
-            <div class="field-row">
-              <div class="field-label">出力フォーマット</div>
-              <div class="field-control">
-                <div>
-                  <label>
-                    形式:
-                    <select id="outFormat">
-                      <option value="ogg" selected>ogg (Vorbis, 推奨)</option>
-                      <option value="wav">wav (PCM)</option>
-                      <option value="mp3">mp3</option>
-                    </select>
-                  </label>
-                  <div class="field-description">
-                    ゲーム用途には Ogg Vorbis 推奨。WAV は可逆、MP3 は汎用プレイヤー向けです。
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Ogg 品質 -->
-            <div class="field-row">
-              <div class="field-label">Ogg 品質</div>
-              <div class="field-control">
-                <div>
-                  <label>
-                    q値:
-                    <input type="number" id="oggQuality" value="3" min="0" max="10" step="1" />
-                  </label>
-                  <div class="field-description">
-                    0〜10 の範囲で指定します。3 は中〜やや高音質。値を上げるとビットレートとファイルサイズが増えます。
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button id="runBtn" class="primary">
-            <span class="btn-icon">▶</span>
-            <span>一括処理を実行</span>
-          </button>
-        </section>
-
-        <!-- 右：ログ / コンソール -->
-        <section>
-          <div class="panel-header" style="margin-bottom: 6px;">
-            <div class="panel-title">Log</div>
-            <div class="panel-hint">
-              実際に切り出された秒数や、エラーなどがここに表示されます。
-            </div>
-          </div>
-          <div id="log">
-            <div class="log-header">
-              <span>Ready.</span>
-              <span class="pill">Zero-cross trim / multi-file</span>
-            </div>
-          </div>
-        </section>
+      <div class="form-group">
+        <label for="fileInput">入力ファイル（複数選択可）</label>
+        <input type="file" id="fileInput" accept="audio/*,video/*" multiple />
       </div>
+
+      <div class="form-group">
+        <label>範囲（秒）</label>
+        <div class="inline-inputs">
+          <label>
+            開始
+            <input type="number" id="startSec" value="1" step="0.01" />
+          </label>
+          <label>
+            終了
+            <input type="number" id="endSec" value="3" step="0.01" />
+          </label>
+        </div>
+        <p class="hint">目安の範囲を指定すると、その近くのゼロクロスポイントで自動調整されます。</p>
+      </div>
+
+      <div class="form-group">
+        <label for="searchRadius">探索範囲（サンプル数）</label>
+        <input type="number" id="searchRadius" value="4000" step="1" />
+        <p class="hint">指定位置から前後に探す範囲です。4000 ≒ 前後 0.09秒。大きくするとクリックが減りやすくなります。</p>
+      </div>
+
+      <div class="form-group">
+        <label for="outFormat">出力フォーマット</label>
+        <select id="outFormat">
+          <option value="ogg" selected>Ogg Vorbis（推奨）</option>
+          <option value="wav">WAV（PCM）</option>
+          <option value="mp3">MP3</option>
+        </select>
+        <p class="hint">ゲーム用途には Ogg Vorbis 推奨。WAV は可逆、MP3 は汎用プレイヤー向けです。</p>
+      </div>
+
+      <div class="form-group">
+        <label for="oggQuality">Ogg 品質（0〜10）</label>
+        <input type="number" id="oggQuality" value="3" min="0" max="10" step="1" />
+        <p class="hint">3は中〜やや高音質。値を上げるとビットレートとファイルサイズが増えます。</p>
+      </div>
+
+      <button id="runBtn">一括処理を実行</button>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">ログ</h2>
+      <div id="log">Ready.</div>
     </div>
   </div>
 
