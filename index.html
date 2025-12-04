@@ -2,71 +2,474 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>Zero-Cross Loop Cutter (Web)</title>
+  <title>Loop Audio Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: system-ui, sans-serif; margin: 20px; background: #111; color: #eee; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-    label { display: block; margin-top: 10px; }
-    input[type="number"] { width: 100px; }
-    select { margin-left: 4px; }
-    button { margin-top: 15px; padding: 6px 12px; cursor: pointer; }
-    #log { white-space: pre-wrap; background: #222; padding: 10px; margin-top: 10px; height: 220px; overflow-y: auto; font-size: 0.85rem; }
-    .row { margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; }
+    :root {
+      --bg: #0f172a;
+      --bg-elevated: #111827;
+      --bg-elevated-soft: #020617;
+      --border-subtle: #1f2937;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.65);
+      --shadow-subtle: 0 0 0 1px rgba(15, 23, 42, 0.8);
+      --font-mono: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(94, 234, 212, 0.10), transparent 55%),
+                  var(--bg-elevated);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(15,23,42,0.9);
+      padding: 20px 22px 18px;
+      backdrop-filter: blur(18px) saturate(140%);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .title span.accent-dot {
+      display: inline-flex;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.9);
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(15,23,42,0.95);
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid rgba(56,189,248,0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      .card {
+        padding: 16px 14px;
+      }
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: linear-gradient(to bottom, rgba(15,23,42,0.75), rgba(15,23,42,0.9));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(15,23,42,0.95);
+      box-shadow: var(--shadow-subtle);
+      padding: 12px 12px 10px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .panel-title {
+      font-size: 0.86rem;
+      font-weight: 550;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .panel-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      column-gap: 8px;
+      row-gap: 4px;
+      align-items: center;
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 640px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-label {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .field-description {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .field-control {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      align-items: center;
+    }
+
+    input[type="number"],
+    select,
+    input[type="file"] {
+      font: inherit;
+      font-size: 0.88rem;
+      padding: 6px 8px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 55%),
+                  #020617;
+      color: var(--text);
+      min-width: 0;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.06s ease;
+    }
+
+    input[type="number"]:focus,
+    select:focus,
+    input[type="file"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.5);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.3), transparent 60%),
+                  #020617;
+      transform: translateY(-0.5px);
+    }
+
+    input[type="file"] {
+      padding: 4px 6px;
+      font-size: 0.8rem;
+    }
+
+    .inline-note {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    button.primary {
+      width: 100%;
+      margin-top: 10px;
+      background: radial-gradient(circle at top, #38bdf8, #0ea5e9);
+      color: #0b1220;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.55);
+      transition: transform 0.06s ease, box-shadow 0.06s ease, filter 0.12s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 48px rgba(56, 189, 248, 0.7);
+      filter: brightness(1.04);
+    }
+
+    button.primary:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45);
+      filter: brightness(0.98);
+    }
+
+    button.primary:disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-icon {
+      font-size: 1rem;
+    }
+
+    #log {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(15,23,42,0.95);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.26), transparent 60%),
+        #020617;
+      box-shadow: var(--shadow-subtle);
+      padding: 10px 10px 9px;
+      height: 212px;
+      overflow-y: auto;
+      color: #e5e7eb;
+      white-space: pre-wrap;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .log-header span {
+      opacity: 0.9;
+    }
+
+    .log-header .pill {
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.85);
+      font-size: 0.7rem;
+    }
+
+    .inline-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 2px 6px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.6);
+      font-size: 0.7rem;
+    }
+
+    .pill-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
   </style>
 </head>
 <body>
-  <h1>Zero-Cross Loop Cutter (Web)</h1>
+  <div class="app-shell">
+    <div class="card">
+      <header class="card-header">
+        <div>
+          <div class="title">
+            <span class="accent-dot"></span>
+            <span>Loop Audio Tool</span>
+          </div>
+          <div class="subtitle">
+            ゼロクロス位置で自動トリムして、ゲーム用ループ音源をまとめて生成します。
+          </div>
+        </div>
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Zero-cross loop</span>
+        </div>
+      </header>
 
-  <label>
-    入力ファイル (mp3 / mp4 / wav / ogg など, 複数選択可):
-    <input type="file" id="fileInput" accept="audio/*,video/*" multiple />
-  </label>
+      <div class="grid">
+        <!-- 左：設定パネル -->
+        <section class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Settings</div>
+            <div class="panel-hint">同じ設定が選択中のすべてのファイルに適用されます。</div>
+          </div>
 
-  <div class="row">
-    <label>
-      開始 (秒):
-      <input type="number" id="startSec" value="1" step="0.01" />
-    </label>
-    <label>
-      終了 (秒):
-      <input type="number" id="endSec" value="3" step="0.01" />
-    </label>
+          <div class="field-group">
+            <!-- ファイル選択 -->
+            <div class="field-row">
+              <div class="field-label">入力ファイル</div>
+              <div class="field-control">
+                <input type="file" id="fileInput" accept="audio/*,video/*" multiple />
+              </div>
+            </div>
+
+            <!-- 開始・終了秒 -->
+            <div class="field-row">
+              <div class="field-label">範囲（秒）</div>
+              <div class="field-control">
+                <div>
+                  <label>
+                    開始:
+                    <input type="number" id="startSec" value="1" step="0.01" />
+                  </label>
+                  &nbsp;&nbsp;
+                  <label>
+                    終了:
+                    <input type="number" id="endSec" value="3" step="0.01" />
+                  </label>
+                  <div class="field-description">
+                    目安の範囲を指定すると、その近くのゼロクロスポイントで自動的に調整されます。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ゼロクロス探索範囲 -->
+            <div class="field-row">
+              <div class="field-label">探索範囲</div>
+              <div class="field-control">
+                <div>
+                  <label>
+                    サンプル数:
+                    <input type="number" id="searchRadius" value="4000" step="1" />
+                  </label>
+                  <div class="field-description">
+                    指定位置から前後に探す範囲です。4000 ≒ 前後 0.09 秒。大きくするとクリックが減りやすくなります。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 出力フォーマット -->
+            <div class="field-row">
+              <div class="field-label">出力フォーマット</div>
+              <div class="field-control">
+                <div>
+                  <label>
+                    形式:
+                    <select id="outFormat">
+                      <option value="ogg" selected>ogg (Vorbis, 推奨)</option>
+                      <option value="wav">wav (PCM)</option>
+                      <option value="mp3">mp3</option>
+                    </select>
+                  </label>
+                  <div class="field-description">
+                    ゲーム用途には Ogg Vorbis 推奨。WAV は可逆、MP3 は汎用プレイヤー向けです。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ogg 品質 -->
+            <div class="field-row">
+              <div class="field-label">Ogg 品質</div>
+              <div class="field-control">
+                <div>
+                  <label>
+                    q値:
+                    <input type="number" id="oggQuality" value="3" min="0" max="10" step="1" />
+                  </label>
+                  <div class="field-description">
+                    0〜10 の範囲で指定します。3 は中〜やや高音質。値を上げるとビットレートとファイルサイズが増えます。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="runBtn" class="primary">
+            <span class="btn-icon">▶</span>
+            <span>一括処理を実行</span>
+          </button>
+        </section>
+
+        <!-- 右：ログ / コンソール -->
+        <section>
+          <div class="panel-header" style="margin-bottom: 6px;">
+            <div class="panel-title">Log</div>
+            <div class="panel-hint">
+              実際に切り出された秒数や、エラーなどがここに表示されます。
+            </div>
+          </div>
+          <div id="log">
+            <div class="log-header">
+              <span>Ready.</span>
+              <span class="pill">Zero-cross trim / multi-file</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-    <label>
-      ゼロクロス探索範囲 (サンプル数):
-      <!-- 初期値 4000 -->
-      <input type="number" id="searchRadius" value="4000" step="1" />
-    </label>
-  </div>
-
-  <div class="row">
-    <label>
-      出力フォーマット:
-      <select id="outFormat">
-        <option value="ogg" selected>ogg (Vorbis)</option>
-        <option value="wav">wav (PCM)</option>
-        <option value="mp3">mp3</option>
-      </select>
-    </label>
-
-    <label>
-      Ogg 品質 (0〜10, 既定値 3):
-      <input type="number" id="oggQuality" value="3" min="0" max="10" step="1" />
-    </label>
-  </div>
-
-  <button id="runBtn">選択したファイルを一括処理してダウンロード</button>
-
-  <div id="log"></div>
-
-  <!-- Ogg Vorbis エンコーダ（CDN）-->
+  <!-- ランタイム -->
   <script src="javascripts/OggVorbisEncoder.js"></script>
-  <!-- MP3 エンコーダ（CDN, lamejs）-->
   <script src="https://unpkg.com/lamejs@1.2.0/lame.min.js"></script>
-
-  <!-- メイン処理 -->
-  <script src="main.js"></script>
+  <script src="./main.js"></script>
 </body>
 </html>
